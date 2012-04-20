@@ -45,8 +45,7 @@ module RailsAdmin
       end
 
       def destroy(objects)
-        # collect all result values from destroy
-        Array.wrap(objects).map(&:destroy).inject(true, :&)
+        Array.wrap(objects).each &:destroy
       end
 
       def primary_key
