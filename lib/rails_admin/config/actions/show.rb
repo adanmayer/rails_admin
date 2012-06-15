@@ -18,12 +18,10 @@ module RailsAdmin
 
         register_instance_option :controller do
           Proc.new do
-            respond_to do |format|
-              format.json { render :json => @object }
-              format.html { render @action.template_name }
-            end
+            render @action.template_name
           end
         end
+
 
         register_instance_option :link_icon do
           'icon-info-sign'

@@ -47,12 +47,7 @@ module RailsAdmin
             scope.limit(associated_collection_scope_limit)
           end
         end
-        
-        # inverse relationship
-        register_instance_option :inverse_of do
-          association[:inverse_of]
-        end
-        
+
         # preload entire associated collection (per associated_collection_scope) on load
         # Be sure to set limit in associated_collection_scope if set is large
         register_instance_option :associated_collection_cache_all do
@@ -77,6 +72,11 @@ module RailsAdmin
         # Reader for the association's key
         def foreign_key
           association[:foreign_key]
+        end
+
+        # Reader for the inverse relationship
+        def inverse_of
+          association[:inverse_of]
         end
         
         # Reader whether this is a polymorphic association

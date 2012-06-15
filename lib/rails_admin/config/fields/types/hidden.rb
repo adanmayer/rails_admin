@@ -10,16 +10,10 @@ module RailsAdmin
           register_instance_option :view_helper do
             :hidden_field
           end
-
-          register_instance_option :label do
-            false
+          
+          register_instance_option(:partial) do
+            :form_field
           end
-
-          register_instance_option :help do
-            false
-          end
-
-
         end
       end
     end

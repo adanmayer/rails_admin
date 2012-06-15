@@ -4,7 +4,7 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # colorpicker
 
-    $('form [data-color]').each ->
+    $('[data-color]').each ->
       that = this
       $(this).ColorPicker
         color: $(that).val()
@@ -20,24 +20,24 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # datetime
 
-    $('form [data-datetimepicker]').each ->
+    $('[data-datetimepicker]').each ->
       $(this).datetimepicker $(this).data('options')
 
     # enumeration
 
-    $('form [data-enumeration]').each ->
+    $('[data-enumeration]').each ->
       $(this).filteringSelect $(this).data('options')
 
     # fileupload
 
-    $('form [data-fileupload]').each ->
+    $('[data-fileupload]').each ->
       input = this
       $(this).find(".delete input[type='checkbox']").live 'click', ->
         $(input).children('.toggle').toggle('slow')
 
     # filtering-multiselect
 
-    $('form [data-filteringmultiselect]').each ->
+    $('[data-filteringmultiselect]').each ->
       $(this).filteringMultiselect $(this).data('options')
       if $(this).parents("#modal").length # hide link if we already are inside a dialog (endless issues on nested dialogs with JS)
         $(this).parents('.control-group').find('.btn').remove()
@@ -46,7 +46,7 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # filtering-select
 
-    $('form [data-filteringselect]').each ->
+    $('[data-filteringselect]').each ->
       $(this).filteringSelect $(this).data('options')
       if $(this).parents("#modal").length # hide link if we already are inside a dialog (endless issues on nested dialogs with JS)
         $(this).parents('.control-group').find('.btn').remove()
@@ -55,7 +55,7 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # nested-many
 
-    $('form [data-nestedmany]').each ->
+    $('[data-nestedmany]').each ->
       field = $(this).parents('.control-group').first()
       nav = field.find('> .controls > .nav')
       content = field.find('> .tab-content')
@@ -63,10 +63,8 @@ $(document).live 'rails_admin.dom_ready', ->
       # add each nested field to a tab-pane and reference it in the nav
       content.children('.fields:not(.tab-pane)').addClass('tab-pane').each ->
         nav.append('<li><a data-toggle="tab" href="#' + this.id + '">' + $(this).children('.object-infos').data('object-label') + '</a></li>')
-      # only if no tab is set to active
-      if nav.find("> li.active").length == 0
-        # init first tab, toggler and content/tabs visibility
-        nav.find("> li > a[data-toggle='tab']:first").tab('show')
+      # init first tab, toggler and content/tabs visibility
+      nav.find("> li > a[data-toggle='tab']:first").tab('show')
       if nav.children().length == 0
         nav.hide()
         content.hide()
@@ -83,7 +81,7 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # nested-one
 
-    $('form [data-nestedone]').each ->
+    $('[data-nestedone]').each ->
       field = $(this).parents('.control-group').first()
       nav = field.find("> .controls > .nav")
       content = field.find("> .tab-content")
@@ -102,7 +100,7 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # polymorphic-association
 
-    $('form [data-polymorphic]').each ->
+    $('[data-polymorphic]').each ->
       type_select = $(this)
       field = type_select.parents('.control-group').first()
       object_select = field.find('select').last()
@@ -126,24 +124,11 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # ckeditor
 
-    $('form [data-richtext=ckeditor]').not('.ckeditored').each ->
+    $('[data-richtext=ckeditor]').each ->
+      window.CKEDITOR_BASEPATH = '/assets/ckeditor/'
       options = $(this).data('options')
-      window.CKEDITOR_BASEPATH = options['base_location']
       if not window.CKEDITOR
         $(window.document).append('<script src="' + options['jspath'] + '"><\/script>')
       if instance = window.CKEDITOR.instances[this.id]
-        instance.destroy(true)
+        window.CKEDITOR.remove(instance)
       window.CKEDITOR.replace(this, options['options'])
-      $(this).addClass('ckeditored')
-
-    #codemirror
-
-    $('form [data-richtext=codemirror]').not('.codemirrored').each ->
-      options = $(this).data('options')
-      if not window.CodeMirror
-        $(window.document).append('<script src="' + options['jspath'] + '" type="text\/javascript"><\/script>')
-        $('head').append('<script src="' + options['locations']['mode'] + '" type="text\/javascript"><\/script>')
-        $('head').append('<link href="' + options['csspath'] + '" rel="stylesheet" media="all" type="text\/css">')
-        $('head').append('<link href="' + options['locations']['theme'] + '" rel="stylesheet" media="all" type="text\/css">')
-      CodeMirror.fromTextArea(this,{mode:options['options']['mode'],theme:options['options']['theme']})
-      $(this).addClass('codemirrored')

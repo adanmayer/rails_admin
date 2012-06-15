@@ -238,24 +238,7 @@ describe 'RailsAdmin::Adapters::Mongoid', :mongoid => true do
       lambda{ RailsAdmin::AbstractModel.new(MongoEmbedsMany).associations }.should raise_error(RuntimeError,
         "Embbeded association without accepts_nested_attributes_for can't be handled by RailsAdmin,\nbecause embedded model doesn't have top-level access.\nPlease add `accepts_nested_attributes_for :mongo_embeddeds' line to `MongoEmbedsMany' model.\n"
       )
-    end
-
-    it "should work with inherited embeds_many model" do
-      class MongoEmbedsParent
-        include Mongoid::Document
-        embeds_many :mongo_embeddeds
-        accepts_nested_attributes_for :mongo_embeddeds
-      end
-
-      class MongoEmbedded
-        include Mongoid::Document
-        embedded_in :mongo_embeds_many
-      end
-
-      class MongoEmbedsChild < MongoEmbedsParent; end
-
-      lambda{ RailsAdmin::AbstractModel.new(MongoEmbedsChild).associations }.should_not raise_error
-    end
+     end
   end
 
   describe "#properties" do
@@ -397,27 +380,6 @@ describe 'RailsAdmin::Adapters::Mongoid', :mongoid => true do
           :length => 255 }
       ]
     end
-
-    it "detects validation length properly" do
-      class LengthValiated
-        include Mongoid::Document
-        field :text, :type => String
-        validates :text, :length => {:maximum => 50}
-      end
-      RailsAdmin::AbstractModel.new('LengthValiated').send(:length_validation_lookup, :text).should == 50
-    end
-
-    it "should not cause problem with custom validators" do
-      class MyCustomValidator < ActiveModel::Validator
-        def validate(r); end
-      end
-      class CustomValiated
-        include Mongoid::Document
-        field :text, :type => String
-        validates_with MyCustomValidator
-      end
-      lambda{ RailsAdmin::AbstractModel.new('CustomValiated').send(:length_validation_lookup, :text) }.should_not raise_error
-    end
   end
 
   describe "data access method" do
@@ -438,8 +400,8 @@ describe 'RailsAdmin::Adapters::Mongoid', :mongoid => true do
       @abstract_model.get('4f4f0824dcf2315093000000').should be_nil
     end
 
-    it "#first returns a player" do
-      @players.should include @abstract_model.first
+    it "#first returns first item" do
+      @abstract_model.first.should == @players.first
     end
 
     it "#count returns count of items" do
@@ -465,7 +427,7 @@ describe 'RailsAdmin::Adapters::Mongoid', :mongoid => true do
       end
 
       it "supports limiting" do
-        @abstract_model.all(:limit => 2).to_a.should have(2).items
+        @abstract_model.all(:limit => 2).to_a.count.should == 2
       end
 
       it "supports retrieval by bulk_ids" do
@@ -566,29 +528,6 @@ describe 'RailsAdmin::Adapters::Mongoid', :mongoid => true do
 
       it "supports filtering" do
         @abstract_model.all(:filters => {"fans" => {"0000" => {:o=>"is", :v=>'foobar'}}}).to_a.should == @teams[1..1]
-      end
-    end
-
-    describe "whose type is embedded has_many" do
-      before do
-        RailsAdmin.config FieldTest do
-          field :embeds do
-            queryable true
-            searchable :all
-          end
-        end
-        @field_tests = FactoryGirl.create_list(:field_test, 3)
-        @field_tests[0].embeds.create :name => 'foo'
-        @field_tests[1].embeds.create :name => 'bar'
-        @abstract_model = RailsAdmin::AbstractModel.new('FieldTest')
-      end
-
-      it "supports querying" do
-        @abstract_model.all(:query => 'bar').to_a.should == @field_tests[1..1]
-      end
-
-      it "supports filtering" do
-        @abstract_model.all(:filters => {"embeds" => {"0000" => {:o=>"is", :v=>'bar'}}}).to_a.should == @field_tests[1..1]
       end
     end
   end

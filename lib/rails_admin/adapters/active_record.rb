@@ -5,14 +5,8 @@ module RailsAdmin
   module Adapters
     module ActiveRecord
       DISABLED_COLUMN_TYPES = [:tsvector, :blob, :binary, :spatial, :hstore]
-
-      def ar_adapter
-        Rails.configuration.database_configuration[Rails.env]['adapter']
-      end
-
-      def like_operator
-        ar_adapter == "postgresql" ? 'ILIKE' : 'LIKE'
-      end
+      AR_ADAPTER = ::ActiveRecord::Base.configurations[Rails.env]['adapter']
+      LIKE_OPERATOR = AR_ADAPTER == "postgresql" ? 'ILIKE' : 'LIKE'
 
       def new(params = {})
         AbstractObject.new(model.new(params))
@@ -41,9 +35,7 @@ module RailsAdmin
         scope = scope.where(model.primary_key => options[:bulk_ids]) if options[:bulk_ids]
         scope = scope.where(query_conditions(options[:query])) if options[:query]
         scope = scope.where(filter_conditions(options[:filters])) if options[:filters]
-        if options[:page] && options[:per]
-          scope = scope.send(Kaminari.config.page_method_name, options[:page]).per(options[:per])
-        end
+        scope = scope.page(options[:page]).per(options[:per]) if options[:page] && options[:per]
         scope = scope.reorder("#{options[:sort]} #{options[:sort_reverse] ? 'asc' : 'desc'}") if options[:sort]
         scope
       end
@@ -190,7 +182,7 @@ module RailsAdmin
           else
             return
           end
-          ["(#{column} #{like_operator} ?)", value]
+          ["(#{column} #{LIKE_OPERATOR} ?)", value]
         when :date
           start_date, end_date = get_filtering_duration(operator, value)
 
